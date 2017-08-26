@@ -3,6 +3,7 @@
 
 // Dependencies
 var express = require("express");
+var path = require("path");
 var bodyParser = require("body-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
@@ -27,6 +28,8 @@ app.use(bodyParser.urlencoded({
 
 // Make public a static dir
 app.use(express.static("public"));
+
+
 
 // Database configuration with mongoose
 mongoose.connect("mongodb://localhost/week18homework", {
@@ -106,16 +109,17 @@ app.get("/articles", function(req, res) {
 // This will get the articles we scraped from the mongoDB
 app.get("/saved", function(req, res) {
   // Grab every doc in the Articles array
-  Article.find({"saved": true}, function(error, doc) {
-    // Log any errors
-    if (error) {
-      console.log(error);
-    }
-    // Or send the doc to the browser as a json object
-    else {
-      res.json(doc);
-    }
-  });
+  res.sendFile(path.join(__dirname+'/public/saved.html'));
+  // Article.find({"saved": true}, function(error, doc) {
+  //   // Log any errors
+  //   if (error) {
+  //     console.log(error);
+  //   }
+  //   // Or send the doc to the browser as a json object
+  //   else {
+  //     res.json(doc);
+  //   }
+  // });
 });
 
 // New note creation via POST route
