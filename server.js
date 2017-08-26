@@ -51,6 +51,43 @@ db.once("open", function() {
 // Routes
 // ======
 
+// HTML ROUTE for viewing saved articles
+app.get("/saved", function(req, res) {
+  // Grab every doc in the Articles array
+  res.sendFile(path.join(__dirname+'/public/saved.html'));
+});
+
+// New note creation via POST route
+app.post("/saved", function(req, res) {
+  console.log("made it post.");
+
+  var id = "59a198158fd99de0d6abeafc";
+  // Use our Note model to make a new note from the req.body
+  var newNote = new Note(req.body);
+  // Save the new note to mongoose
+  newNote.save(function(error, doc) {
+    // Send any errors to the browser
+    if (error) {
+      res.send(error);
+    }
+    // Otherwise
+    else {
+      // Find our article and push the new note id into the Articles's notes array
+      Article.findOneAndUpdate({"_id": id}, { $push: { "notes": doc._id } }, { new: true }, function(err, newdoc) {
+        // Send any errors to the browser
+        if (err) {
+          res.send(err);
+        }
+        // Or send the newdoc to the browser
+        else {
+          res.send(newdoc);
+        }
+      });
+    }
+  });
+});
+
+
 // Scrape data from one site and place it into the mongodb db
 app.get("/scrape", function(req, res) {
   // Make a request for the news section of ycombinator
@@ -107,20 +144,21 @@ app.get("/articles", function(req, res) {
 });
 
 // This will get the articles we scraped from the mongoDB
-app.get("/saved", function(req, res) {
+app.get("/articles/saved", function(req, res) {
   // Grab every doc in the Articles array
-  res.sendFile(path.join(__dirname+'/public/saved.html'));
-  // Article.find({"saved": true}, function(error, doc) {
-  //   // Log any errors
-  //   if (error) {
-  //     console.log(error);
-  //   }
-  //   // Or send the doc to the browser as a json object
-  //   else {
-  //     res.json(doc);
-  //   }
-  // });
+  Article.find({"saved": true}, function(error, doc) {
+    // Log any errors
+    if (error) {
+      console.log(error);
+    }
+    // Or send the doc to the browser as a json object
+    else {
+      res.json(doc);
+    }
+  });
 });
+
+
 
 // New note creation via POST route
 app.post("/saved", function(req, res) {
@@ -152,18 +190,26 @@ app.post("/saved", function(req, res) {
 
 // New note creation via POST route
 app.post("/submit", function(req, res) {
+
+  // get the id of the article
+
   // Use our Note model to make a new note from the req.body
-  var newNote = new Note(req.body);
+  var newNote = new Note({
+    body: req.body.note});
+
   // Save the new note to mongoose
   newNote.save(function(error, doc) {
     // Send any errors to the browser
+    console.log(doc);
+
+    console.log(doc);
     if (error) {
       res.send(error);
     }
     // Otherwise
     else {
-      // Find our user and push the new note id into the User's notes array
-      User.findOneAndUpdate({}, { $push: { "notes": doc._id } }, { new: true }, function(err, newdoc) {
+      // Find our article and push the new note id into the Articles's notes array
+      Article.findOneAndUpdate({}, { $push: { "notes": doc._id }}, { new: true }, function(err, newdoc) {
         // Send any errors to the browser
         if (err) {
           res.send(err);

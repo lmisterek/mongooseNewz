@@ -19,7 +19,14 @@ var ArticleSchema = new Schema({
   saved: {
     type: Boolean,
     default: false
-  }
+  },
+  // notes property for the article
+  notes: [{
+    // Store ObjectIds in the array
+    type: Schema.Types.ObjectId,
+    // The ObjectIds will refer to the ids in the Note model
+    ref: "Note"
+  }]
 });
 
 // Create the Article model with the ArticleSchema
